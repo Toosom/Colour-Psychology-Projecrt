@@ -1,0 +1,301 @@
+# Importing necessary libraries
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+#Reading the data file
+df = pd.read_excel('C:/Users/HP/Downloads/Somto.xlsx')
+# Display the first few rows of the dataframe
+df.head()
+# Define a function to plot bar charts
+def plot_bar_chart(data, title, xlabel, ylabel, rotation=None):
+    plt.figure(figsize=(8, 6))
+    data.plot(kind='bar', color='skyblue')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    if rotation:
+        plt.xticks(rotation=rotation)
+    plt.show()
+# Plot bar chart for academic background
+plot_bar_chart(df['Academic Background'].value_counts(), 
+               'Distribution of Academic Background', 
+               'Academic Background', 'Frequency')
+# Plot bar chart for job role
+plot_bar_chart(df['Job Role'].value_counts(), 
+               'Distribution of Job Role', 
+               'Job Role', 'Frequency', rotation=45)
+# Plot bar chart for generational group
+plot_bar_chart(df['Generational Group'].value_counts(), 
+               'Distribution of Generational Group', 
+               'Generational Group', 'Frequency')
+# Plot bar chart for generational group
+plot_bar_chart(df['Social Proof'].value_counts(), 
+               'Distribution of rating for Social proof', 
+               'Socila Proof', 'Frequency')
+# Plot bar chart for generational group
+plot_bar_chart(df['Accessibility'].value_counts(), 
+               'Distribution of rating for Accessibility', 
+               'Accessibility', 'Frequency')
+# Plot bar chart for generational group
+plot_bar_chart(df['Feedback mechanism'].value_counts(), 
+               'Distribution of rating for Feedback mechanism', 
+               'Feedback mechanism', 'Frequency')
+# Plot bar chart for generational group
+plot_bar_chart(df['Personalization'].value_counts(), 
+               'Distribution of rating for Personalization', 
+               'Personalization', 'Frequency')
+# Plot bar chart for generational group
+plot_bar_chart(df['Engagimg content'].value_counts(), 
+               'Distribution of rating for Engagimg content', 
+               'Engagimg content', 'Frequency')
+# Plot bar chart for generational group
+plot_bar_chart(df['Fast Loading Speed'].value_counts(), 
+               'Distribution of rating for Fast Loading Speed', 
+               'Fast Loading Speed', 'Frequency')
+# Plot bar chart for generational group
+plot_bar_chart(df['Visual Appealing'].value_counts(), 
+               'Distribution of rating for Visual Appealing', 
+               'Visual Appealing', 'Frequency')
+# Plot bar chart for generational group
+plot_bar_chart(df['Clear Navigation'].value_counts(), 
+               'Distribution of rating for Clear Navigation', 
+               'Clear Navigation', 'Frequency')
+# Plot bar chart for generational group
+plot_bar_chart(df['Mobile Responsiveness '].value_counts(), 
+               'Distribution of rating for Mobile Responsiveness ', 
+               'Mobile Responsiveness ', 'Frequency')
+# Mapping dictionary to recode the categories
+mapping_dict = {'Strongly Disagree': 1, 'Disagree': 2, 'Neutral': 3, 'Agree': 4, 'Strongly Agree': 5}
+
+# Select variables related to factors contributing to an interactive website
+interactive_factors = df[['Mobile Responsiveness ', 'Clear Navigation', 'Visual Appealing', 'Fast Loading Speed', 
+                          'Engagimg content', 'Interactive Elements', 'Personalization', 'Social Proof', 
+                          'Accessibility', 'Feedback mechanism']]
+
+# Recode the categorical variables
+for column in interactive_factors.columns:
+    interactive_factors[column] = interactive_factors[column].map(mapping_dict)
+
+# Display the updated DataFrame
+print(interactive_factors)
+# Initialize FactorAnalyzer
+fa = FactorAnalyzer(n_factors=3, rotation='varimax')
+# Perform one-hot encoding
+#interactive_factors_encoded = pd.get_dummies(interactive_factors)
+# Fit FactorAnalyzer to your data
+fa.fit(interactive_factors)
+# Get factor loadings
+factor_loadings = pd.DataFrame(fa.loadings_, index=interactive_factors.columns)
+# Print factor loadings
+print("Factor Loadings:")
+print(factor_loadings)
+# Get variance explained by each factor
+explained_variance = fa.get_factor_variance()
+# Print variance explained
+print("\nVariance Explained:")
+print(explained_variance)
+import statsmodels.api as sm
+# Get factor scores for each observation
+factor_scores = fa.transform(interactive_factors)
+
+# Create a DataFrame for factor scores
+factor_scores_df = pd.DataFrame(factor_scores, columns=['Factor 1', 'Factor 2', 'Factor 3'])
+
+# Print factor scores
+print("Factor Scores:")
+print(factor_scores_df)
+# Get the names of the selected variables contributing to each factor
+selected_variables = {}
+
+for factor in factor_loadings.columns:
+    factor_loadings_abs = factor_loadings[factor].abs()  # Take absolute values for easier comparison
+    top_variables_idx = factor_loadings_abs.argsort()[::-1][:3]  # Select top 3 variables with highest loadings
+    top_variables = factor_loadings.index[top_variables_idx].tolist()
+    selected_variables[factor] = top_variables
+
+# Print selected variables for each factor
+print("Selected variables for each factor:")
+for factor, variables in selected_variables.items():
+    print(f"Factor {factor}: {variables}")
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Extract factor loadings from the factor analysis results
+factor_loadings = fa.loadings_
+
+# Define variables and factors
+variables = interactive_factors.columns
+factors = [f'Factor {i+1}' for i in range(factor_loadings.shape[1])]
+
+# Plot factor loadings for each variable
+plt.figure(figsize=(12, 8))
+for i, factor in enumerate(factors):
+    plt.barh(variables, factor_loadings[:, i], label=factor)
+
+plt.xlabel('Factor Loadings')
+plt.ylabel('Variables')
+plt.title('Factor Loadings for Each Variable')
+plt.legend()
+plt.grid(True)
+plt.show()
+from scipy.stats import chi2_contingency
+# Create a contingency table
+contingency_table = pd.crosstab(df['Preference_Light_or_Dark_Color_Scheme'], df['Generational Group'])
+# Perform chi-square test
+chi2, p, dof, expected = chi2_contingency(contingency_table)
+# Print the chi-square test results
+print("Chi-Square Test Results:")
+print(f"Chi2 Value: {chi2}")
+print(f"P-value: {p}")
+print(f"Degrees of Freedom: {dof}")
+print("Expected Frequencies:")
+print(expected)
+from scipy.stats import chi2_contingency
+
+# Create a contingency table of observed frequencies
+contingency_table = pd.crosstab(df['Job Role'], df['Preference_Light_or_Dark_Color_Scheme'])
+
+# Perform the chi-square test
+chi2, p, dof, expected = chi2_contingency(contingency_table)
+
+# Print the results
+print("Chi-Square Test Results:")
+print(f"Chi2 Value: {chi2}")
+print(f"P-value: {p}")
+print(f"Degrees of Freedom: {dof}")
+print("Expected Frequencies:")
+print(expected)
+from scipy.stats import chi2_contingency
+
+# Create a contingency table of observed frequencies
+contingency_table = pd.crosstab(df['Color_Scheme_Impact_on_Shopping_Experience'], df['Preference_Light_or_Dark_Color_Scheme'])
+
+# Perform the chi-square test
+chi2, p, dof, expected = chi2_contingency(contingency_table)
+
+# Print the results
+print("Chi-Square Test Results:")
+print(f"Chi2 Value: {chi2}")
+print(f"P-value: {p}")
+print(f"Degrees of Freedom: {dof}")
+print("Expected Frequencies:")
+print(expected)
+# Step 1: Data Preparation
+# Extract the relevant variables from the dataset
+color_scheme_pref = df['Preference_Light_or_Dark_Color_Scheme']
+impact_on_shopping = df['Color_Scheme_Impact_on_Shopping_Experience']
+
+# Encode categorical variables using label encoding
+from sklearn.preprocessing import LabelEncoder
+label_encoder = LabelEncoder()
+
+color_scheme_pref_encoded = label_encoder.fit_transform(color_scheme_pref)
+impact_on_shopping_encoded = label_encoder.fit_transform(impact_on_shopping)
+# Create a new DataFrame with the encoded variables
+segmentation_data = pd.DataFrame({
+    'Preference_Light_or_Dark_Color_Scheme': color_scheme_pref_encoded,
+    'Color_Scheme_Impact_on_Shopping_Experience': impact_on_shopping_encoded
+})
+
+# Step 2: Clustering
+from sklearn.cluster import KMeans
+
+# Define the number of clusters
+n_clusters = 6
+
+# Apply K-means clustering
+kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+segmentation_data['Segment'] = kmeans.fit_predict(segmentation_data)
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Set the style of seaborn
+sns.set(style='whitegrid')
+
+# Plot the segmentation
+plt.figure(figsize=(10, 6))
+sns.scatterplot(
+    x='Preference_Light_or_Dark_Color_Scheme', 
+    y='Color_Scheme_Impact_on_Shopping_Experience', 
+    hue='Segment', 
+    data=segmentation_data, 
+    palette='Set1',
+    legend='full'
+)
+plt.title('Segmentation of Respondents based on Color Scheme Preferences and Shopping Impact')
+plt.xlabel('Preference for Light or Dark Color Scheme')
+plt.ylabel('Impact of Color Scheme on Shopping Experience')
+plt.legend(title='Segment')
+plt.show()
+from scipy.stats import chi2_contingency
+
+# Create a contingency table of observed frequencies
+contingency_table = pd.crosstab(df['Likelihood_of_Revisiting_Based_on_Color_Appeal'], df['Preference_Light_or_Dark_Color_Scheme'])
+
+# Perform the chi-square test
+chi2, p, dof, expected = chi2_contingency(contingency_table)
+
+# Print the results
+print("Chi-Square Test Results:")
+print(f"Chi2 Value: {chi2}")
+print(f"P-value: {p}")
+print(f"Degrees of Freedom: {dof}")
+print("Expected Frequencies:")
+print(expected)
+# Step 1: Data Preparation
+# Extract the relevant variables from the dataset
+color_scheme_pref = df['Preference_Light_or_Dark_Color_Scheme']
+impact_on_shopping = df['Likelihood_of_Revisiting_Based_on_Color_Appeal']
+
+# Encode categorical variables using label encoding
+from sklearn.preprocessing import LabelEncoder
+label_encoder = LabelEncoder()
+
+color_scheme_pref_encoded = label_encoder.fit_transform(color_scheme_pref)
+impact_on_shopping_encoded = label_encoder.fit_transform(impact_on_shopping)
+
+# Create a new DataFrame with the encoded variables
+segmentation_data = pd.DataFrame({
+    'Preference_Light_or_Dark_Color_Scheme': color_scheme_pref_encoded,
+    'Likelihood_of_Revisiting_Based_on_Color_Appeal': impact_on_shopping_encoded
+})
+
+# Step 2: Clustering
+from sklearn.cluster import KMeans
+
+# Define the number of clusters
+n_clusters = 5
+
+# Apply K-means clustering
+kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+segmentation_data['Segment'] = kmeans.fit_predict(segmentation_data)
+
+# Analyze the characteristics of each segment
+segment_characteristics = segmentation_data.groupby('Segment').mean()
+
+# Display the characteristics of each segment
+print(segment_characteristics)
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Set the style of seaborn
+sns.set(style='whitegrid')
+
+# Plot the segmentation
+plt.figure(figsize=(10, 6))
+sns.scatterplot(
+    x='Preference_Light_or_Dark_Color_Scheme', 
+    y='Likelihood_of_Revisiting_Based_on_Color_Appeal', 
+    hue='Segment', 
+    data=segmentation_data, 
+    palette='Set1',
+    legend='full'
+)
+plt.title('Segmentation of Respondents based on Color Scheme Preferences and Likelihood of revisit')
+plt.xlabel('Preference for Light or Dark Color Scheme')
+plt.ylabel('Likelihood_of_Revisiting_Based_on_Color_Appeal')
+plt.legend(title='Segment')
+plt.show()
+
